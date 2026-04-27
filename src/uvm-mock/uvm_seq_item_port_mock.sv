@@ -10,8 +10,8 @@
 */
 `define uvm_seq_item_pull_port_mock_item_pull_port_t
 `define MOCKTYPE uvm_seq_item_pull_port_mock_item_pull_port_t
-class uvm_seq_item_pull_port_mock #(type T=int) extends item_pull_port_t;
-  typedef uvm_seq_item_pull_port_mock #(T) PARENT;
+class uvm_seq_item_pull_port_mock #(type REQ=int, type RSP=REQ) extends uvm_seq_item_pull_port #(REQ);
+  typedef uvm_seq_item_pull_port_mock #(REQ, RSP) PARENT;
   __mocker __mockers [$];
 
   function bit verify();
@@ -35,11 +35,11 @@ class uvm_seq_item_pull_port_mock #(type T=int) extends item_pull_port_t;
   //---------------
   // get_next_item
   //---------------
-  `SVMOCK_TASK1(get_next_item, output, T, t, /*scalar*/, /*no-default*/)
+  `SVMOCK_TASK1(get_next_item, output, REQ, t, /*scalar*/, /*no-default*/)
 
   `SVMOCK_MAP_TASK1(get_next_item,_get_next_item)
-  mailbox #(T) item_mb = new();
-  virtual task _get_next_item(output T t);
+  mailbox #(REQ) item_mb = new();
+  virtual task _get_next_item(output REQ t);
     item_mb.get(t);
   endtask
 
@@ -47,21 +47,21 @@ class uvm_seq_item_pull_port_mock #(type T=int) extends item_pull_port_t;
   //-----------
   // item_done
   //-----------
-  `SVMOCK_VFUNC1(item_done, input, T, t, /*scalar*/, null)
+  `SVMOCK_VFUNC1(item_done, input, REQ, t, /*scalar*/, null)
 
   `SVMOCK_MAP_VFUNC1(item_done,_item_done)
-  virtual function void _item_done(input T t = null);
+  virtual function void _item_done(input REQ t = null);
   endfunction
 
 
   //--------------
   // put_response
   //--------------
-  `SVMOCK_VFUNC1(put_response, input, T, t, /*scalar*/, /*no-default*/)
+  `SVMOCK_VFUNC1(put_response, input, REQ, t, /*scalar*/, /*no-default*/)
 
   `SVMOCK_MAP_VFUNC1(put_response,_put_response)
-  mailbox #(T) rsp_mb = new();
-  virtual function void _put_response(input T t);
+  mailbox #(REQ) rsp_mb = new();
+  virtual function void _put_response(input REQ t);
     void'(rsp_mb.try_put(t));
   endfunction
 
@@ -70,7 +70,7 @@ class uvm_seq_item_pull_port_mock #(type T=int) extends item_pull_port_t;
   // Misc
   //------
   function void flush();
-    T dumped;
+    REQ dumped;
 
     while (rsp_mb.try_get(dumped) > 0);
     while (item_mb.try_get(dumped) > 0);
