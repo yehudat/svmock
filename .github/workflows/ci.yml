@@ -69,11 +69,14 @@ jobs:
 
       - name: Run tests
         run: |
-          source $HOME/svunit/Setup.bsh
-          cd test/ut
+          # Setup.bsh uses `pwd` to set SVUNIT_INSTALL, so it must be sourced
+          # from the SVUnit checkout root.
+          cd $HOME/svunit
+          source Setup.bsh
+          cd $GITHUB_WORKSPACE/test/ut
           runSVUnit -s verilator
           if [[ "${{ github.event_name }}" == "merge_group" ]]; then
             # L1 tier: also run the bedrock example end-to-end
-            cd ../../examples/class/bedrock
+            cd $GITHUB_WORKSPACE/examples/class/bedrock
             runSVUnit -s verilator
           fi
